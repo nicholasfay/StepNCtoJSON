@@ -254,8 +254,8 @@ int main(int argc, char ** argv)
     // Recursively traverse the root assemblies and write out the
     // faceted data.
     switch (fmt) {
-    case FmtWebXML:
-	return NCtoXML(&opts);
+    /*case FmtWebXML:
+	return NCtoXML(&opts);*/
     case FmtJSON:
 	return NCtoJSON(&opts);
 

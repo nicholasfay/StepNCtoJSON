@@ -1,8 +1,8 @@
-/* $RCSfile: dump_project.cxx,v $
+/* $RCSfile: StepNCtoJSON.cxx,v $
  * $Revision: 1.18 $ $Date: 2015/07/16 16:22:59 $
  * Auth: Nicholas Fay (fayn@rpi.edu)
  * 
- * 	Copyright (c) 1991-2014 by STEP Tools Inc.
+ * 	Copyright (c) 1991-2015 by STEP Tools Inc.
  * 	All Rights Reserved
  * 
  * 	This software is furnished under a license and may be used and
@@ -154,7 +154,7 @@ static double get_tool_length(Machining_operation_IF * op)
 	= udmt->get_overall_assembly_length();
 
     /* FIXME: convert units */
-    return stix_get_measure_value(mri, stixunit_as_is);
+    return stix_get_measure_value(mri, roseunit_as_is);
 
 }
 
@@ -171,7 +171,7 @@ static double get_tool_length(Workpiece_probing_IF * op)
 	= tool->get_overall_assembly_length();
 
     /* FIXME: convert units */
-    return stix_get_measure_value(mri, stixunit_as_is);
+    return stix_get_measure_value(mri, roseunit_as_is);
     
 }
 
@@ -252,46 +252,46 @@ static double get_mri_value(stp_measure_with_unit * mri)
 }
 
 
-static double get_speed_per_sec(stp_measure_with_unit * mu, StixUnit len_unit)
+static double get_speed_per_sec(stp_measure_with_unit * mu, RoseUnit len_unit)
 {
-    StixUnit speed_un = stix_get_unit_type(mu->unit_component());
+    RoseUnit speed_un = stix_get_unit_type(mu->unit_component());
 
     /* Component units of speed unit */
-    StixUnit speed_len;
-    StixUnit speed_time;
+    RoseUnit speed_len;
+    RoseUnit speed_time;
 
     switch(speed_un) {
-    case stixunit_mmps:
-	speed_len = stixunit_mm;
-	speed_time = stixunit_sec;
+    case roseunit_mmps:
+	speed_len = roseunit_mm;
+	speed_time = roseunit_sec;
 	break;
-    case stixunit_mmpm:
-	speed_len = stixunit_mm;
-	speed_time = stixunit_min;
+    case roseunit_mmpm:
+	speed_len = roseunit_mm;
+	speed_time = roseunit_min;
 	break;
-    case stixunit_cmps:
-	speed_len = stixunit_cm;
-	speed_time = stixunit_sec;
+    case roseunit_cmps:
+	speed_len = roseunit_cm;
+	speed_time = roseunit_sec;
 	break;
-    case stixunit_mps:
-	speed_len = stixunit_m;
-	speed_time = stixunit_sec;
+    case roseunit_mps:
+	speed_len = roseunit_m;
+	speed_time = roseunit_sec;
 	break;
-    case stixunit_ips:
-	speed_len = stixunit_in;
-	speed_time = stixunit_sec;
+    case roseunit_ips:
+	speed_len = roseunit_in;
+	speed_time = roseunit_sec;
 	break;
-    case stixunit_ipm:
-	speed_len = stixunit_in;
-	speed_time = stixunit_min;
+    case roseunit_ipm:
+	speed_len = roseunit_in;
+	speed_time = roseunit_min;
 	break;
-    case stixunit_fps:
-	speed_len = stixunit_ft;
-	speed_time = stixunit_sec;
+    case roseunit_fps:
+	speed_len = roseunit_ft;
+	speed_time = roseunit_sec;
 	break;
-    case stixunit_fpm:
-	speed_len = stixunit_ft;
-	speed_time = stixunit_min;
+    case roseunit_fpm:
+	speed_len = roseunit_ft;
+	speed_time = roseunit_min;
 	break;
 
     default:
@@ -299,15 +299,15 @@ static double get_speed_per_sec(stp_measure_with_unit * mu, StixUnit len_unit)
 	exit (2);
     }
 
-    double factor = stix_get_unit_conversion_factor(speed_len, len_unit) /
-	stix_get_unit_conversion_factor (speed_time, stixunit_sec);
+    double factor = rose_get_unit_conversion_factor(speed_len, len_unit) /
+	rose_get_unit_conversion_factor (speed_time, roseunit_sec);
 
     return get_mri_value(mu) * factor;
 }
 
 
 
-double get_tech_feedrate(stp_machining_technology * tech, StixUnit len_unit)
+double get_tech_feedrate(stp_machining_technology * tech, RoseUnit len_unit)
 {
     Milling_technology * arm = Milling_technology::find(tech);
 
@@ -442,13 +442,13 @@ static void append_tp_point(
 
 static double get_rot_value(stp_measure_representation_item * mri)
 {
-    StixUnit un = stix_get_unit_type(mri->unit_component());
+    RoseUnit un = stix_get_unit_type(mri->unit_component());
 
     switch (un) {
-    case stixunit_hertz:
+    case roseunit_hertz:
 	return get_mri_value(mri);
 
-    case stixunit_rpm:
+    case roseunit_rpm:
 	return get_mri_value(mri) / 60.;
 
     default:
@@ -462,7 +462,7 @@ static double get_rot_value(stp_measure_representation_item * mri)
 static void dump_tech(
     Value& techJ,
     stp_machining_technology * tech,
-    StixUnit len_unit)
+    RoseUnit len_unit)
 {
     if (tech->wasVisited())
 	return;
@@ -505,14 +505,14 @@ static FILE * open_dir_file(const char * dir, const char * fname)
 
 static void append_bbox(
     Value& value,
-    StixMeshBoundingBox * bbox)
+    RoseBoundingBox * bbox)
 {
-    value.append(bbox->minx);
-    value.append(bbox->miny);
-    value.append(bbox->minz);
-    value.append(bbox->maxx);
-    value.append(bbox->maxy);
-    value.append(bbox->maxz);
+    value.append(bbox->minx());
+    value.append(bbox->miny());
+    value.append(bbox->minz());
+    value.append(bbox->maxx());
+    value.append(bbox->maxy());
+    value.append(bbox->maxz());
 }
 
 static void dump_toolpath(
@@ -528,7 +528,7 @@ static void dump_toolpath(
 {
     stp_machining_technology * tech = tp->get_its_technology();
 
-    StixUnit lun = stix_get_context_unit(bcurve_rep, stixvalue_length);
+    RoseUnit lun = stix_get_context_unit(bcurve_rep, rosemeasure_length); //Not sure about 2nd param
 
     double feed = get_tech_feedrate(tech, lun);
 
@@ -569,7 +569,7 @@ static void dump_toolpath(
 	}
     }
     
-    StixMeshBoundingBox bbox;
+    RoseBoundingBox bbox;
     stat.bcurve.getConvexHull(&bbox);
     
     if (tol == ROSE_NULL_REAL) {
@@ -870,14 +870,15 @@ static void add_xform(Value& input, const char * att,
     if (place == 0)
 	return;
 
-    StixMtrx xform(place);
-    
+    RoseXform xform;
+    stix_xform_put(xform, place);
+
     unsigned i,j;
     Value xformarr;
     for (i=0; i<4; i++)
 	for (j=0; j<4; j++) {
 	    char buff[20];
-	    sprintf(buff, "%s%g", (i == 0 && j == 0) ? "" : " ", xform.get(j, i));
+	    sprintf(buff, "%s%g", (i == 0 && j == 0) ? "" : " ", xform.m[i]);
 	    xformarr.append(buff);
 	}
 	input[att] = xformarr;
@@ -900,16 +901,15 @@ void dump_placement (
     add_ref_id(placement, buff);
     placeJ["id"] = buff;
 
-    StixMtrx xform(placement);
+    RoseXform xform;
+    stix_xform_put(xform, placement);
     
-    unsigned i,j;
+    unsigned i;
     Value xformarr;
-    for (i = 0; i < 4; i++){
-	for (j = 0; j < 4; j++) {
-	    char buff[20];
-	    sprintf(buff, "%s%g", (i == 0 && j == 0) ? "" : " ", xform.get(j, i));
-	    xformarr.append(buff);
-	}
+    for (i = 0; i < 16; i++){
+	char buff[20];
+	sprintf(buff, "%s%g", (!i ? "" : " "), xform.m[i]);
+	xformarr.append(buff);
     }
 
     placeJ["xform"] = xformarr;
@@ -1027,16 +1027,14 @@ static void append_asm_child(
     shape["ref"] = buff;
 
 
-    StixMtrx xform = stix_get_transform(rm);
+    RoseXform xform = stix_get_transform(rm);
 
-    unsigned i, j;
+    unsigned i;
     Value xformarr;
     for (i = 0; i < 4; i++){
-	for (j = 0; j < 4; j++) {
-	    char buff[20];
-	    sprintf(buff, "%s%g", (i == 0 && j == 0) ? "" : " ", xform.get(j, i));
-	    xformarr.append(buff);
-	}
+	char buff[20];
+	sprintf(buff, "%s%g", (!i ? "" : " "), xform.m[i]);
+	xformarr.append(buff);
     }
     shape["xform"] = xformarr;
 }
@@ -1375,13 +1373,13 @@ static void append_annotations(
 }
 
 static void append_facet(
-    const StixMeshFacetSet * fs,
+    const RoseMeshFacetSet * fs,
     unsigned fidx,
     int write_normal,
     Value &facets
     )
 {
-    const StixMeshFacet * f = fs->getFacet(fidx);
+    const RoseMeshFacet * f = fs->getFacet(fidx);
     if (!f) return;
 
     Value vertices;
@@ -1433,14 +1431,14 @@ void append_shell_facets(
     int WRITE_NORMAL = 0;
     unsigned i, sz;
     unsigned j, szz;
-    const StixMeshFacetSet * facets = shell->getFacetSet();
+    const RoseMeshFacetSet * facets = shell->getFacetSet();
 
     char id[64];
     add_ref_id(shell->getStepSolid(),id);
     shellVal["id"] = id;
 
     unsigned dflt_color = stixmesh_get_color(shell->getStepSolid());
-    if (dflt_color != STIXMESH_NULL_COLOR){
+    if (dflt_color != ROSE_MESH_NULL_COLOR){
 	char buff[] = "rrggbb ";
 	sprintf(buff, "%06x", dflt_color);
 	shellVal["color"] = buff;
@@ -1478,10 +1476,10 @@ void append_shell_facets(
 	    continue;
 
 	// Always tag the face with a color, unless everything is null. 
-	if (color == STIXMESH_NULL_COLOR)
+	if (color == ROSE_MESH_NULL_COLOR)
 	    color = dflt_color;
 
-	if (color != STIXMESH_NULL_COLOR){
+	if (color != ROSE_MESH_NULL_COLOR){
 	    char buff2[] = "rrggbb ";
 	    sprintf(buff2, "%06x", dflt_color);
 	    color2 = buff2;
@@ -1512,8 +1510,8 @@ static void export_shell(
     else
     {
 	unsigned i, sz;
-	StixMeshBoundingBox bbox;
-	const StixMeshFacetSet * facets = shell->getFacetSet();
+	RoseBoundingBox bbox;
+	const RoseMeshFacetSet * facets = shell->getFacetSet();
 
 	// compute the bounding box for the shell
 	for (i = 0, sz = facets->getVertexCount(); i<sz; i++)
@@ -1532,12 +1530,12 @@ static void export_shell(
 
 	Value bboxArr;
 	//Turn the 6 bbox values into an array and set equal to bbox
-	bboxArr.append(bbox.minx);
-	bboxArr.append(bbox.miny);
-	bboxArr.append(bbox.minz);
-	bboxArr.append(bbox.maxx);
-	bboxArr.append(bbox.maxy);
-	bboxArr.append(bbox.maxz);
+	bboxArr.append(bbox.minx());
+	bboxArr.append(bbox.miny());
+	bboxArr.append(bbox.minz());
+	bboxArr.append(bbox.maxx());
+	bboxArr.append(bbox.maxy());
+	bboxArr.append(bbox.maxz());
 
 	shellVal["bbox"] = bboxArr;
 
@@ -1634,10 +1632,10 @@ void dumpShapeAsm(
     add_ref_id(sr, buff);
     shape["id"] = buff;
 
-    StixUnit unit = stix_get_context_length_unit(sr);
-    if (unit != stixunit_unknown) {
+    RoseUnit unit = stix_get_context_length_unit(sr);
+    if (unit != roseunit_unknown) {
 	char buff[20];
-	sprintf(buff, "%s %f", stix_get_unit_name(unit), stix_get_converted_measure(1., unit, stixunit_m));
+	sprintf(buff, "%s %f", stix_get_unit_name(unit), rose_get_measure_as_unit(1., unit, roseunit_m));
 	shape["unit"] = buff;
     }
 
@@ -2069,7 +2067,7 @@ void dump_project(
     dump_exec (json, shellArr, wp, ROSE_TRUE, fn,async,opts);
 }
 
-static StixUnit get_unit(stp_product_definition * pd)
+static RoseUnit get_unit(stp_product_definition * pd)
 {
     unsigned i;
     StpAsmShapeRepVec as_is;
@@ -2077,35 +2075,35 @@ static StixUnit get_unit(stp_product_definition * pd)
 
     printf ("Resolving unit: %p\n", pd);
     if (pd == 0)
-	return stixunit_unknown;
+	return roseunit_unknown;
     
     resolve_workpiece(&as_is, &to_be, pd);
     printf ("Have WP: %d %d\n", as_is.size(), to_be.size());
     
     for (i=0; i<as_is.size(); i++) {
-	StixUnit unit = stix_get_context_length_unit(as_is[i]);
-	if (unit != stixunit_unknown)
+	RoseUnit unit = stix_get_context_length_unit(as_is[i]);
+	if (unit != roseunit_unknown)
 	    return unit;
     }
 
     for (i=0; i<to_be.size(); i++) {
-	StixUnit unit = stix_get_context_length_unit(to_be[i]);
-	if (unit != stixunit_unknown)
+	RoseUnit unit = stix_get_context_length_unit(to_be[i]);
+	if (unit != roseunit_unknown)
 	    return unit;
     }
-    return stixunit_unknown;
+    return roseunit_unknown;
 }
 
-static StixUnit get_unit(Executable_IF * exec)
+static RoseUnit get_unit(Executable_IF * exec)
 {
-    StixUnit ret;
+    RoseUnit ret;
     
     ret = get_unit(exec->get_to_be_geometry());
-    if (ret != stixunit_unknown)
+    if (ret != roseunit_unknown)
 	return ret;
 
     ret = get_unit(exec->get_as_is_geometry());
-    if (ret != stixunit_unknown)
+    if (ret != roseunit_unknown)
 	return ret;
 
     Workplan_IF * wp = ARM_CAST(Workplan_IF, exec);
@@ -2117,18 +2115,18 @@ static StixUnit get_unit(Executable_IF * exec)
 	    ret = get_unit(el);
 	    printf ("Have unit: %d\n", ret);
 	    
-	    if (ret != stixunit_unknown)
+	    if (ret != roseunit_unknown)
 		return ret;
 	}
     }
     
-    return stixunit_unknown;
+    return roseunit_unknown;
 }
 
-static StixUnit get_unit(Project * proj)
+static RoseUnit get_unit(Project * proj)
 {
     unsigned i,sz;
-    StixUnit unit;
+    RoseUnit unit;
     
     stp_machining_workplan * wp = proj->get_main_workplan();
 
@@ -2148,25 +2146,25 @@ static StixUnit get_unit(Project * proj)
 
     for (i=0; i<as_is.size(); i++) {
 	unit = stix_get_context_length_unit(as_is[i]);
-	if (unit != stixunit_unknown)
+	if (unit != roseunit_unknown)
 	    return unit;
     }
 
     for (i=0; i<to_be.size(); i++) {
 	unit = stix_get_context_length_unit(to_be[i]);
-	if (unit != stixunit_unknown)
+	if (unit != roseunit_unknown)
 	    return unit;
     }
 
     unit = get_unit(Workplan::find(proj->get_main_workplan()));
-    if (unit != stixunit_unknown)
+    if (unit != roseunit_unknown)
 	return unit;
     
     printf ("No unit\n");
     exit (2);
 }
 
-static StixUnit get_unit(RoseDesign * des)
+static RoseUnit get_unit(RoseDesign * des)
 {
     ARMCursor cur;
     cur.traverse(des);
@@ -2175,8 +2173,8 @@ static StixUnit get_unit(RoseDesign * des)
     Project * proj;
     
     while ((proj = ARM_CAST(Project, cur.next())) != 0) {
-	StixUnit ret = get_unit(proj);
-	if (ret != stixunit_unknown)
+	RoseUnit ret = get_unit(proj);
+	if (ret != roseunit_unknown)
 	    return ret;
     }
     
@@ -2187,14 +2185,13 @@ static StixUnit get_unit(RoseDesign * des)
 
 
 /*
- * usage: stpfile JSONfile
+ * usage: stpfile -> JSONfile
  */
 int NCtoJSON(stp2webgl_opts * opts)
 {
     /* Disable buffering */
     setvbuf(stdout, 0, _IONBF, 2);
 
-    const char * fname = 0;
     const char * JSONname = 0;
 
 
@@ -2203,10 +2200,7 @@ int NCtoJSON(stp2webgl_opts * opts)
 
     if (opts->do_split){
 	write_dir = ROSE_TRUE;
-	fname = opts->srcfile;
     }
-    else
-	fname = opts->srcfile;
 
     FILE * out =0;
     char o_d[64];
@@ -2215,7 +2209,7 @@ int NCtoJSON(stp2webgl_opts * opts)
 	if (!JSONname)
 	    out = fopen("YourStepFile.JSON", "w");
 	else
-	   out = fopen (JSONname, "w"); 
+	    out = fopen (JSONname, "w"); 
     }
     else {
 	if (!JSONname)
@@ -2248,10 +2242,10 @@ int NCtoJSON(stp2webgl_opts * opts)
 
     Value json;
 
-    StixUnit unit = get_unit(opts->design);
+    RoseUnit unit = get_unit(opts->design);
 
     char buff[20];
-    sprintf (buff, "%s %f", stix_get_unit_name(unit),stix_get_converted_measure(1., unit, stixunit_m));
+    sprintf (buff, "%s %f", stix_get_unit_name(unit),rose_get_measure_as_unit(1., unit, roseunit_m));
 
     json["project-data"]["unit"] = buff;
     

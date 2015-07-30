@@ -11,14 +11,12 @@
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="dump_project (1).cxx" />
     <ClCompile Include="jsoncpp.cpp" />
-    <ClCompile Include="StepNCtoJSON2.cxx" />
-    <ClCompile Include="stixmesh_export.cxx" />
+    <ClCompile Include="StepNCtoJSON.cxx" />
     <ClCompile Include="stp2webgl.cxx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="stixmesh_export.h" />
+    <ClInclude Include="json.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{64BCC2C5-0498-4D2B-B433-FD0C288EA70B}</ProjectGuid>
@@ -61,7 +59,7 @@
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalLibraryDirectories>$(ROSE)\lib\i86_win32_vc12_md</AdditionalLibraryDirectories>
-      <AdditionalDependencies>stpman_stixsim.lib;glu32.lib;opengl32.lib;gdi32.lib;stmodule.lib;stpman_arm.lib;stpman.lib;stgl.lib;stpcad_stixmesh.lib;stpcad_stix.lib;p28e2.lib;rose.lib;dtnurbsc.lib;vcf2c.lib;kernel32.lib;user32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>rosemath.lib;stpman_stixsim.lib;glu32.lib;opengl32.lib;gdi32.lib;stmodule.lib;stpman_arm.lib;stpman.lib;stgl.lib;stpcad_stixmesh.lib;stpcad_stix.lib;p28e2.lib;rose.lib;dtnurbsc.lib;vcf2c.lib;kernel32.lib;user32.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;odbc32.lib;odbccp32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
